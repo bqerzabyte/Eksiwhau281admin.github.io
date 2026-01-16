@@ -13,14 +13,6 @@
             <p>إدارة تفعيلات الأجهزة والتحكم السحابي</p>
         </header>
 
-        <section class="config-section">
-            <div class="card">
-                <h3>إعدادات الاتصال بالسحابة</h3>
-                <input type="text" id="firebaseUrl" placeholder="أدخل رابط Firebase Realtime Database هنا...">
-                <button id="connectBtn" class="btn-secondary">حفظ وإظهار الأجهزة</button>
-            </div>
-        </section>
-
         <section class="activation-section">
             <div class="card">
                 <h3>تفعيل جهاز جديد</h3>
@@ -28,13 +20,14 @@
                     <input type="text" id="deviceIdInput" placeholder="أدخل كود الجهاز (مثال: LM-A1B2C3)">
                     <button id="activateBtn" class="btn-primary">تفعيل الآن</button>
                 </div>
+                <p style="font-size: 0.8rem; color: #666; margin-top: 10px;">* سيتم التفعيل مباشرة على قاعدة بيانات Firebase المرتبطة.</p>
             </div>
         </section>
 
         <section class="list-section">
             <div class="card">
-                <h3>الأجهزة المفعلة (المسجلة في السحابة)</h3>
-                <div id="loadingStatus" style="display:none;">جاري تحميل البيانات...</div>
+                <h3>الأجهزة المفعلة حالياً</h3>
+                <div id="loadingStatus" style="display:none; text-align: center; padding: 10px;">جاري تحميل البيانات...</div>
                 <table id="devicesTable">
                     <thead>
                         <tr>
