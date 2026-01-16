@@ -1,62 +1,78 @@
-// Lebanese Marketing - Admin Web App Logic (v1.9 - FIXED LINK)
+// Lebanese Marketing - Admin Web App Logic (v2.0 - STABLE & INTERACTIVE)
 
-// الرابط الخاص بك تم تثبيته هنا لضمان العمل 100%
 const FIXED_FIREBASE_URL = "https://extensionapjwuwhwtest-default-rtdb.firebaseio.com";
 
-const deviceIdInput = document.getElementById("deviceIdInput");
-const activateBtn = document.getElementById("activateBtn");
-const devicesList = document.getElementById("devicesList");
-const loadingStatus = document.getElementById("loadingStatus");
+// دالة التحميل عند فتح الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Admin Panel Loaded");
+    loadDevices();
+    
+    const activateBtn = document.getElementById("activateBtn");
+    if (activateBtn) {
+        activateBtn.onclick = activateDevice;
+    } else {
+        console.error("Activate button not found!");
+    }
+});
 
-// Initialize on load
-loadDevices();
-
-// Load Devices from Firebase
+// دالة تحميل الأجهزة من السحابة
 async function loadDevices() {
-    loadingStatus.style.display = "block";
-    devicesList.innerHTML = "";
+    const devicesList = document.getElementById("devicesList");
+    const loadingStatus = document.getElementById("loadingStatus");
+    
+    if (loadingStatus) loadingStatus.style.display = "block";
+    if (devicesList) devicesList.innerHTML = "";
 
     try {
         const response = await fetch(`${FIXED_FIREBASE_URL}/devices.json`);
+        if (!response.ok) throw new Error("Network response was not ok");
+        
         const data = await response.json();
-
-        loadingStatus.style.display = "none";
+        if (loadingStatus) loadingStatus.style.display = "none";
 
         if (!data) {
-            devicesList.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا توجد أجهزة مسجلة حالياً</td></tr>';
+            if (devicesList) devicesList.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا توجد أجهزة مسجلة حالياً</td></tr>';
             return;
         }
 
-        // Render devices
         Object.keys(data).forEach(id => {
             const device = data[id];
             const row = document.createElement("tr");
             row.innerHTML = `
                 <td>${id}</td>
                 <td>${device.activatedAt ? new Date(device.activatedAt).toLocaleString("ar-EG") : "-"}</td>
-                <td><span class="status-active">مفعل ✅</span></td>
-                <td><button class="btn-delete" onclick="deleteDevice('${id}')">حذف</button></td>
+                <td><span class="status-active" style="color: #25D366; font-weight: bold;">مفعل ✅</span></td>
+                <td><button class="btn-delete" onclick="deleteDevice('${id}')" style="border: 1px solid #e74c3c; color: #e74c3c; background: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">حذف</button></td>
             `;
-            devicesList.appendChild(row);
+            if (devicesList) devicesList.appendChild(row);
         });
     } catch (e) {
-        loadingStatus.style.display = "none";
+        if (loadingStatus) loadingStatus.style.display = "none";
         console.error("Error loading devices:", e);
-        alert("فشل في الاتصال بـ Firebase. تأكد من إعدادات الـ Rules في Firebase.");
     }
 }
 
-// Activate New Device
+// دالة تفعيل جهاز جديد
 async function activateDevice() {
-    const deviceId = deviceIdInput.value.trim();
+    const deviceIdInput = document.getElementById("deviceIdInput");
+    const deviceId = deviceIdInput ? deviceIdInput.value.trim() : "";
+
     if (!deviceId) {
-        alert("يرجى إدخال كود الجهاز");
+        alert("⚠️ يرجى إدخال كود الجهاز أولاً!");
         return;
     }
 
+    // تغيير حالة الزر أثناء المعالجة
+    const activateBtn = document.getElementById("activateBtn");
+    const originalText = activateBtn.innerText;
+    activateBtn.innerText = "جاري التفعيل...";
+    activateBtn.disabled = true;
+
     try {
+        console.log("Attempting to activate:", deviceId);
         const response = await fetch(`${FIXED_FIREBASE_URL}/devices/${deviceId}.json`, {
             method: "PATCH",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 activated: true,
                 activatedAt: new Date().toISOString()
@@ -64,18 +80,22 @@ async function activateDevice() {
         });
 
         if (response.ok) {
-            alert(`تم تفعيل الجهاز ${deviceId} بنجاح!`);
-            deviceIdInput.value = "";
-            loadDevices(); // Refresh list
+            alert(`✅ تم تفعيل الجهاز (${deviceId}) بنجاح!`);
+            if (deviceIdInput) deviceIdInput.value = "";
+            loadDevices(); // تحديث القائمة
         } else {
-            alert("فشل التفعيل. تأكد من اتصال الإنترنت.");
+            alert("❌ فشل التفعيل. تأكد من إعدادات Firebase (Rules).");
         }
     } catch (e) {
-        alert("حدث خطأ أثناء التفعيل");
+        console.error("Activation error:", e);
+        alert("❌ حدث خطأ في الاتصال بالسحابة. تأكد من الإنترنت.");
+    } finally {
+        activateBtn.innerText = originalText;
+        activateBtn.disabled = false;
     }
 }
 
-// Delete Device
+// دالة حذف جهاز
 async function deleteDevice(id) {
     if (!confirm(`هل أنت متأكد من حذف تفعيل الجهاز ${id}؟`)) return;
 
@@ -85,17 +105,18 @@ async function deleteDevice(id) {
         });
 
         if (response.ok) {
-            loadDevices(); // Refresh list
+            alert("✅ تم حذف الجهاز بنجاح.");
+            loadDevices();
+        } else {
+            alert("❌ فشل الحذف.");
         }
     } catch (e) {
-        alert("حدث خطأ أثناء الحذف");
+        alert("❌ حدث خطأ أثناء الحذف.");
     }
 }
 
-activateBtn.addEventListener("click", () => activateDevice());
-
-// Expose delete function to global scope for onclick
+// جعل دالة الحذف متاحة عالمياً
 window.deleteDevice = deleteDevice;
 
-// Refresh list every 30 seconds
-setInterval(loadDevices, 30000);
+// تحديث تلقائي كل دقيقة
+setInterval(loadDevices, 60000);
