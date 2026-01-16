@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Lebanese Marketing</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f9; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #075E54; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #25D366; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #128C7E; }
+        .log { margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px; }
+        .device-item { background: #f9f9f9; padding: 10px; margin: 5px 0; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .status { font-size: 0.8rem; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Lebanese Marketing - Activation Panel</h2>
+        <p>أدخل كود الجهاز (Device ID) لتفعيله:</p>
+        <input type="text" id="deviceIdInput" placeholder="Example: LM-A1B2C3...">
+        <button onclick="activateDevice()">تفعيل الجهاز الآن</button>
+
+        <div class="log">
+            <h3>الأجهزة المفعلة مؤخراً:</h3>
+            <div id="deviceList">
+                <!-- سيتم إضافة الأجهزة هنا -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function activateDevice() {
+            const id = document.getElementById('deviceIdInput').value.trim();
+            if (!id) {
+                alert('يرجى إدخال كود الجهاز');
+                return;
+            }
+
+            const list = document.getElementById('deviceList');
+            const item = document.createElement('div');
+            item.className = 'device-item';
+            item.innerHTML = `<span>${id}</span> <span class="status">تم التفعيل ✅</span>`;
+            list.prepend(item);
+            
+            alert('تم إرسال أمر التفعيل للجهاز: ' + id);
+            document.getElementById('deviceIdInput').value = '';
+        }
+    </script>
+</body>
+</html>
